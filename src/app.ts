@@ -6,9 +6,12 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import { LeaguesController } from './controllers/leagues.controller';
 import helmet from 'helmet';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 const app: Express = express();
-const PORT = 8080;
+const PORT = process.env.PORT || 443;
 
 app
   .use(cors({ credentials: true, origin: true }))
