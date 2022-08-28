@@ -28,6 +28,6 @@ export interface FantasyTeam {
   id: number;
   teamName: string;
   teamId: number;
-  leagueId: number;
+  leagueId: string;
   isFavorite: boolean;
 }

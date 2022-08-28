@@ -1,11 +1,14 @@
 import { Sequelize } from 'sequelize-typescript';
 import { League } from '../models/league.model';
 import { Team } from '../models/team.model';
+import * as dotenv from 'dotenv';
 
-const sequelize = new Sequelize('db', '', null, {
+dotenv.config();
+
+const sequelize = new Sequelize(process.env.JAWSDB_URL, {
   logging: false,
-  dialect: 'sqlite',
-  storage: './database.sqlite',
+  dialect: 'mysql',
+
   models: [Team, League],
 });
 
