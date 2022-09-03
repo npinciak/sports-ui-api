@@ -1,11 +1,17 @@
-import { Table, Index, Column, Model, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Optional } from 'sequelize/types';
 
-export interface FantasyLeague {
+interface FantasyLeagueAttributes {
   id: number;
   leagueName: string;
   leagueId: string;
   leagueSport: FantasySports;
+  leagueYear: string;
 }
+
+export interface FantasyLeagueInput extends Optional<FantasyLeagueAttributes, 'id'> {}
+export interface FantasyLeagueOutput extends Required<FantasyLeagueAttributes> {}
+export type FantasyLeague = FantasyLeagueAttributes;
 
 export enum FantasySports {
   baseball = 'flb',
@@ -14,13 +20,11 @@ export enum FantasySports {
   hockey = 'fhl',
 }
 
+const FantasySportsList = [FantasySports.baseball, FantasySports.football, FantasySports.basketball, FantasySports.hockey];
+
 @Table
-export class League extends Model<FantasyLeague> {
-  @Column({
-    primaryKey: true,
-    autoIncrement: true,
-    comment: 'id',
-  })
+export class League extends Model<FantasyLeagueAttributes, FantasyLeagueInput> implements FantasyLeagueAttributes {
+  @Column({ primaryKey: true, autoIncrement: true })
   id: number;
 
   @Column(DataType.STRING)
@@ -29,10 +33,9 @@ export class League extends Model<FantasyLeague> {
   @Column(DataType.STRING)
   leagueId: string;
 
-  @Column(
-    DataType.ENUM({
-      values: [FantasySports.baseball, FantasySports.football, FantasySports.basketball, FantasySports.hockey],
-    })
-  )
+  @Column(DataType.STRING)
+  leagueYear: string;
+
+  @Column(DataType.ENUM({ values: FantasySportsList }))
   leagueSport: FantasySports;
 }

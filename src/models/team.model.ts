@@ -1,13 +1,23 @@
-import { Table, Index, Column, Model, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Optional } from 'sequelize/types';
 
-const { STRING, TEXT, INTEGER, BIGINT } = DataType;
+interface FantasyTeamAttributes {
+  id: number;
+  teamName: string;
+  teamId: number;
+  leagueId: string;
+  isFavorite: boolean;
+}
+
+export interface FantasyTeamInput extends Optional<FantasyTeamAttributes, 'id'> {}
+export interface FantasyTeamOutput extends Required<FantasyTeamAttributes> {}
+export type FantasyTeam = FantasyTeamAttributes;
 
 @Table
-export class Team extends Model<FantasyTeam> {
+export class Team extends Model<FantasyTeamOutput, FantasyTeamInput> implements FantasyTeamAttributes {
   @Column({
     primaryKey: true,
     autoIncrement: true,
-    comment: 'user id',
   })
   id: number;
 
@@ -17,17 +27,9 @@ export class Team extends Model<FantasyTeam> {
   @Column(DataType.INTEGER)
   teamId: number;
 
-  @Column(DataType.BIGINT)
-  leagueId: number;
+  @Column(DataType.STRING)
+  leagueId: string;
 
   @Column({ type: DataType.BOOLEAN, defaultValue: false })
-  isFavorite: boolean;
-}
-
-export interface FantasyTeam {
-  id: number;
-  teamName: string;
-  teamId: number;
-  leagueId: string;
   isFavorite: boolean;
 }
