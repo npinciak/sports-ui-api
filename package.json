@@ -9,7 +9,7 @@
     "test": "jest",
     "test:watch": "npm run test --watch-all",
     "migration:tables": "ts-node ./src/scripts/sync.ts",
-    "migration:dfs": "ts-node ./src/scripts/sync-dfs.ts",
+    "import:dfs": "ts-node ./src/scripts/sync-dfs.ts",
     "build": "tsc",
     "postinstall": "npm run build"
   },

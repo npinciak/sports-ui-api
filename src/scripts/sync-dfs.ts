@@ -1,27 +1,46 @@
 import axios from 'axios';
-import { Request, Response } from 'express';
-import { ApiClient } from 'helpers/http.client';
-import { DfsSlatePlayer } from '../models/dfs-client-player.model';
 import sequelize from '../config/connection';
-import { DfsPlayer, PlayerAttributes } from '../models/dfs-player.model';
+import { DfsPlayer, PlayerAttributes } from '../api/models/dfs-player.model';
+import { ClientSlateAttributes } from './dfs-client-models/daily-fantasy-client-slate-attr.model';
+import { DfsSlatePlayer, SlateMasterMap } from './dfs-client-models/daily-fantasy-client.model';
+import { DfsPlayerAttr } from '../api/models/dfs-player-attributes.model';
+import { DailyFantasyEndpointBuilder } from '../helpers/dfs-endpoints.helper';
 
 export function DfsSync() {
   class DfsSync {
+    static slateId = '74919';
+    static date = '2022-09-28';
+    static sport = 'nfl';
+
     static async drop() {
       sequelize.sync().then(async () => {
-        await DfsPlayer.drop()
-          .then(() => console.log('DfsPlayer table drop successful'))
-          .catch(() => console.error('DfsPlayer table drop failed'));
+        await Promise.all([
+          DfsPlayer.drop()
+            .then(() => console.log('DfsPlayer table drop successful'))
+            .catch(() => console.error('DfsPlayer table drop failed')),
+
+          DfsPlayerAttr.drop()
+            .then(() => console.log('DfsPlayerAttr table drop successful'))
+            .catch(() => console.error('DfsPlayerAttr table drop failed')),
+          ,
+        ]);
       });
     }
 
-    static async import() {
+    static async importSlateMasterBySport() {
+      const endpoint = new DailyFantasyEndpointBuilder(DfsSync.sport);
+
+      const data = await axios.get<SlateMasterMap>(endpoint.slateMaster).then(data => data.data);
+      const slatePaths = data.draftkings[this.slateId].slate_path;
+
+      DfsSync.importPlayersBySlateId(slatePaths);
+    }
+
+    static async importPlayersBySlateId(slatePath: string) {
       sequelize
         .sync()
         .then(async () => {
-          const data = await axios
-            .get<DfsSlatePlayer[]>(`https://s3.amazonaws.com/json.rotogrinders.com/v2.00/slates/draftkings/29/71429.json`)
-            .then(data => data.data);
+          const data = await axios.get<DfsSlatePlayer[]>(slatePath).then(data => data.data);
 
           const dfs: PlayerAttributes[] = data
             .map(p => {
@@ -38,12 +57,7 @@ export function DfsSync() {
 
           await DfsPlayer.bulkCreate(dfs).then(async () => {
             const dfsCount = await DfsPlayer.findAll().then(p => p.length);
-
-            console.log(`Created
-              
-            DfsPlayer: ${dfsCount}
-         
-          `);
+            console.log(`Imported ${dfsCount} players`);
           });
         })
         .catch(err => console.error(err));
@@ -51,17 +65,23 @@ export function DfsSync() {
 
     static async importAttr() {
       sequelize.sync().then(async () => {
-        const data = await axios
-          .get<{ [id: string]: { id: string; salary_diff: { [id: number]: { salary: string } } } }>(
-            `https://rotogrinders.com/schedules/nfl/game-attributes?date=2022-09-11&site=draftkings&slate_id=71429`
-          )
+        const res = await axios
+          .get(`https://rotogrinders.com/schedules/nfl/game-attributes?date=${DfsSync.date}&site=draftkings&slate_id=${DfsSync.slateId}`)
           .then(data => data.data.players);
 
-        const test = Object.entries(data).map(([id, player]) => ({
-          id,
-          dk_salary: Number(player),
-        }));
-        console.log(test);
+        const test = Object.keys(res).map(key => {
+          const p = res[key];
+          return {
+            id: Number(key),
+            slateId: Number(DfsSync.slateId),
+            dk_salary: p.salary_diff[20] ? Number(p.salary_diff[20]?.salary) : 0,
+          };
+        });
+
+        await DfsPlayerAttr.bulkCreate(test).then(async () => {
+          const dfsCount = await DfsPlayerAttr.findAll().then((p: any[]) => p.length);
+          console.log(`Imported ${dfsCount} players attributes`);
+        });
       });
     }
   }
@@ -69,6 +89,8 @@ export function DfsSync() {
   return DfsSync;
 }
 
+// DfsSync().importSlateMasterBySport();
+DfsSync().importAttr();
+
 // DfsSync().drop();
-DfsSync().import();
-// DfsSync().importAttr();
+// DfsSync().import();

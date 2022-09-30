@@ -11,4 +11,4 @@ dfsPlayer.delete('/:id', async (req, res) => DfsPlayersController.deleteEntityBy
 
 export { dfsPlayer };
 
-export class DfsPlayerRouter extends BaseRouter({ controller: DfsPlayersController }) {}
+// export class DfsPlayerRouter extends BaseRouter({ controller: DfsPlayersController }) {}

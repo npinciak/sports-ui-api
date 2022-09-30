@@ -9,8 +9,8 @@ const router = Router();
 
 router.use('/leagues', leaguesRouter);
 router.use('/users', usersRouter);
-router.use('/dfs', dfsPlayer);
-router.use('/dfs-attr', dfsPlayerAttr);
+// router.use('/dfs', dfsPlayer);
+// router.use('/dfs-attr', dfsPlayerAttr);
 
 router.use('/teams', TeamTestRouter.getAll);
 

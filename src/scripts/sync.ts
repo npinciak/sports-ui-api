@@ -1,17 +1,6 @@
-import { FantasyLeague, FantasySports, League } from '../models/league.model';
-import { FantasyTeam, Team } from '../models/team.model';
-import { User } from '../models/user.model';
+import { FantasyLeague, FantasySports, League } from '../api/models/league.model';
+import { FantasyTeam, Team } from '../api/models/team.model';
 import sequelize from '../config/connection';
-import { DfsPlayer, PlayerAttributes } from '../models/dfs-player.model';
-
-const MOCK_DFS_PLAYER: PlayerAttributes = {
-  id: 1,
-  rgId: 1,
-  name: 'Test',
-  teamId: 2,
-  position: 'RB',
-  rgTeamId: 4,
-};
 
 export function runMigration() {
   sequelize
@@ -21,12 +10,10 @@ export function runMigration() {
       // User.bulkCreate(MOCK_USER_LIST);
       // Team.bulkCreate(MOCK_TEAM_LIST);
       // League.bulkCreate(MOCK_LEAGUE_LIST);
-
       //   const dfsCount = await DfsPlayer.findAll().then(p => p.length);
-
       // const userCount = await User.findAll().then(user => user.length);
       // const teamCount = await Team.findAll().then(team => team.length);
-      const leagueCount = await League.findAll().then(l => l.length);
+      // const leagueCount = await League.findAll().then(l => l.length);
     })
     .catch(err => console.error(err));
 }

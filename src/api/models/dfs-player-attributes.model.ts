@@ -3,6 +3,7 @@ import { Optional } from 'sequelize/types';
 
 export interface DfsPlayerAttributes {
   id: number;
+  slateId: number;
   dk_salary: number;
 }
 
@@ -12,6 +13,9 @@ export type DfsPlayerAttributesInput = Optional<DfsPlayerAttributes, 'id'>;
 export class DfsPlayerAttr extends Model<DfsPlayerAttributes, DfsPlayerAttributesInput> implements DfsPlayerAttributes {
   @Column({ primaryKey: true })
   id: number;
+
+  @Column(DataType.INTEGER)
+  slateId: number;
 
   @Column(DataType.INTEGER)
   dk_salary: number;
