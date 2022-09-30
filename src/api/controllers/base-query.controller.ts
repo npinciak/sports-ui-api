@@ -1,21 +1,25 @@
 import { Model, ModelCtor } from 'sequelize-typescript';
 import { Attributes, CreationAttributes, WhereOptions } from 'sequelize';
 import { PropertyOfType } from './base.controller';
+import { IBaseQueryControllerClass } from '../models/base-query-controller.model';
 
 export function BaseQueryController<EntityType, M extends Model>({
-  idProperty,
+  primaryKeyProperty,
+  entityIdProperty,
   modelClass,
 }: {
-  idProperty: PropertyOfType<EntityType, string | number>;
+  primaryKeyProperty: PropertyOfType<EntityType, string | number>;
+  entityIdProperty: PropertyOfType<EntityType, string | number>;
   modelClass: ModelCtor<M>;
 }) {
   class BaseQueryControllerClass {
     static modelClass = modelClass;
 
-    static getId = (t: EntityType) => t[idProperty] as unknown as string;
+    static getEntityId = (t: EntityType) => t[entityIdProperty] as unknown as string;
+    static getPrimaryKey = (t: EntityType) => t[primaryKeyProperty] as unknown as string;
 
     static async getEntityById(id: string): Promise<M> {
-      const where: WhereOptions<Attributes<M>> = { where: { [idProperty as any]: id } };
+      const where: WhereOptions<Attributes<M>> = { where: { [entityIdProperty as any]: id } };
 
       try {
         const entity = await modelClass.findOne(where).then(entity => entity);
@@ -23,7 +27,7 @@ export function BaseQueryController<EntityType, M extends Model>({
         if (entity) {
           return entity;
         } else {
-          throw new Error('er');
+          throw new Error(`Could not retrieve ${id}`);
         }
       } catch (error) {
         return error;
@@ -34,25 +38,22 @@ export function BaseQueryController<EntityType, M extends Model>({
       try {
         return await modelClass.findAll().then(entity => entity);
       } catch (error) {
-        console.error(error);
-        return;
+        return error;
       }
     }
 
     static async createEntity(payload: CreationAttributes<M>) {
       try {
-        return await modelClass.create(payload as CreationAttributes<M>).then(entity => entity);
+        return await modelClass.create(payload).then(entity => entity);
       } catch (error) {
-        console.error(error);
-        return;
+        return error;
       }
     }
 
     static async deleteEntityById(id: string) {
-      const where: WhereOptions<Attributes<M>> = { where: { [idProperty as any]: id } };
-
+      const where: WhereOptions<Attributes<M>> = { where: { [primaryKeyProperty as any]: id } };
       try {
-        const entity = await BaseQueryControllerClass.getEntityById(id);
+        const entity = await modelClass.findByPk(id);
 
         if (entity) {
           return await entity.destroy(where);
@@ -63,10 +64,10 @@ export function BaseQueryController<EntityType, M extends Model>({
     }
 
     static async updateEntityById(id: string, payload: {}) {
-      const where: WhereOptions<Attributes<M>> = { where: { [idProperty as any]: id } };
+      const where: WhereOptions<Attributes<M>> = { where: { [entityIdProperty as any]: id } };
 
       try {
-        const entity = await BaseQueryControllerClass.getEntityById(id);
+        const entity = await modelClass.findByPk(id);
 
         if (entity) {
           return await entity.update(payload, where).then(entity => entity);
@@ -76,15 +77,5 @@ export function BaseQueryController<EntityType, M extends Model>({
       }
     }
   }
-
   return BaseQueryControllerClass;
-}
-
-export interface IBaseQueryControllerClass<T> {
-  new (...args: any[]): any;
-  getEntityById(id: string): Promise<T>;
-  getAllEntities(): Promise<T[]>;
-  createEntity(payload: {}): Promise<T>;
-  updateEntityById(id: string, payload: {}): Promise<T>;
-  deleteEntityById(id: string): Promise<T>;
 }

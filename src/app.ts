@@ -1,12 +1,10 @@
-import express, { Express } from 'express';
+import express from 'express';
 import sequelize from './config/connection';
-import { Team } from './models/team.model';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import helmet from 'helmet';
 import * as dotenv from 'dotenv';
-// import { MOCK_LEAGUE_LIST, MOCK_TEAM_LIST, MOCK_USER_LIST, runMigration } from './scripts/sync';
-import { router } from './routes';
+import { router } from './api/routes';
 
 dotenv.config();
 
@@ -31,8 +29,3 @@ app.listen(PORT, async () => {
 });
 
 app.use('/api/v1/', router);
-
-app.get('/sync-all', async (req, res) => {
-  // runMigration();
-  return res.status(201);
-});

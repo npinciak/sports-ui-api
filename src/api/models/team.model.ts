@@ -5,7 +5,7 @@ interface FantasyTeamAttributes {
   id: number;
   teamName: string;
   teamId: number;
-  leagueId: string;
+  teamEspnLeagueId: string;
   isFavorite: boolean;
 }
 
@@ -28,7 +28,7 @@ export class Team extends Model<FantasyTeamOutput, FantasyTeamInput> implements 
   teamId: number;
 
   @Column(DataType.STRING)
-  leagueId: string;
+  teamEspnLeagueId: string;
 
   @Column({ type: DataType.BOOLEAN, defaultValue: false })
   isFavorite: boolean;

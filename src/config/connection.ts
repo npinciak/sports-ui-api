@@ -1,16 +1,17 @@
 import { Sequelize } from 'sequelize-typescript';
-import { League } from '../models/league.model';
-import { Team } from '../models/team.model';
 import * as dotenv from 'dotenv';
-import { User } from '../models/user.model';
+import { DfsPlayerAttr } from '../api/models/dfs-player-attributes.model';
+import { DfsPlayer } from '../api/models/dfs-player.model';
+import { League } from '../api/models/league.model';
+import { Team } from '../api/models/team.model';
+import { User } from '../api/models/user.model';
 
 dotenv.config();
 
 const sequelize = new Sequelize(process.env.JAWSDB_URL, {
-  logging: false,
+  logging: true,
   dialect: 'mysql',
-
-  models: [Team, League, User],
+  models: [Team, League, User, DfsPlayer, DfsPlayerAttr],
 });
 
 export default sequelize;
